@@ -29,6 +29,10 @@ Bot.prototype.init = function (config) {
 		var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '0.0.0.0';
 	  proxyReq.setHeader('x-forwarded-for', ip);
 	});
+	this.proxy.on('error', function (err, req, res) {
+		res.writeHead(500, { 'Content-Type': 'text/plain' });
+		res.end('Something went wrong. And we are reporting a custom error message.');
+	});
 
 	this.http = require('http').createServer(function (req, res) { self.forward(req, res); });
 	this.http.on('error', function(err) {
