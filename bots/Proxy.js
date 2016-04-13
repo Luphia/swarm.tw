@@ -27,11 +27,11 @@ Bot.prototype.init = function (config) {
 	this.proxy = httpProxy.createProxyServer({});
 	this.proxy.on('proxyReq', function(proxyReq, req, res, options) {
 		var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '0.0.0.0';
-	  proxyReq.setHeader('x-forwarded-for', ip);
+		proxyReq.setHeader('x-forwarded-for', ip);
 	});
 	this.proxy.on('error', function (err, req, res) {
 		res.writeHead(500, { 'Content-Type': 'text/plain' });
-		res.end('Something went wrong. And we are reporting a custom error message.');
+		res.end('Peer offline, data can not be accessed.');
 	});
 
 	this.http = require('http').createServer(function (req, res) { self.forward(req, res); });
