@@ -1,0 +1,43 @@
+{
+  "name": "swarm.tw",
+  "version": "0.1.0",
+  "description": "Peer to Peer network tracker",
+  "main": "bin/swarm.tw.js",
+  "bin": {
+    "swarm": "bin/swarm.tw.js"
+  },
+  "scripts": {
+    "test": "bin/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Luphia/swarm.tw.git"
+  },
+  "keywords": [
+    "backend"
+  ],
+  "author": "Luphia Chang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Luphia/swarm.tw/issues"
+  },
+  "homepage": "https://github.com/Luphia/swarm.tw",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "borg-ring": "^0.1.1",
+    "dvalue": "^1.0.6",
+    "ecdb": "^0.2.11",
+    "echashcash": "^1.0.1",
+    "express": "^4.13.3",
+    "express-session": "^1.13.0",
+    "http-proxy": "^1.13.2",
+    "kerberos": "0.0.18",
+    "log4js": "^0.6.29",
+    "mongodb": "^2.1.11",
+    "multer": "^1.1.0",
+    "raid2x": "^0.1.23",
+    "serve-favicon": "^2.3.0",
+    "textype": "^1.0.3",
+    "udp2p": "^0.2.17"
+  }
+}
