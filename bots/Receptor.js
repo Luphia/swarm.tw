@@ -198,7 +198,6 @@ Bot.prototype.init = function(config) {
 	this.app.set('port', this.serverPort.pop());
 	this.app.set('portHttps', this.httpsPort.pop());
 	this.app.use(this.session);
-	this.app.use(function (req, res, next) { self.tokenParser(req, res, next); });
 	this.app.use(express.static(path.join(__dirname, '../public')));
 	this.app.use(bodyParser.urlencoded({ extended: false }));
 	this.app.use(bodyParser.json({}));
@@ -322,18 +321,6 @@ Bot.prototype.filter = function (req, res, next) {
 	res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 	res.header("Access-Control-Allow-Headers", "Hashcash, Authorization, Content-Type");
 	next();
-};
-
-Bot.prototype.tokenParser = function (req, res, next) {
-	var bot = this.getBot('User');
-	var auth = req.headers.authorization;
-	var token = !!auth? auth.split(" ")[1]: '';
-	bot.checkToken(token, function (e, d) {
-		if(!!d) {
-			req.session.uid = d.uid;
-		}
-		next();
-	});
 };
 
 module.exports = Bot;
