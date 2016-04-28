@@ -8,6 +8,9 @@ const mongodb = require('mongodb');
 const Result = require('../classes/Result.js');
 
 var period = 86400000 * 7;
+var alive = 60000;
+
+var logger;
 
 var nodeEncode = function(node) {
 	node = node || {};
@@ -54,6 +57,11 @@ var Bot = function (config) {
 };
 
 util.inherits(Bot, ParentBot);
+
+Bot.prototype.init = function (config) {
+	Bot.super_.prototype.init.call(this, config);
+	logger = config.logger;
+};
 
 Bot.prototype.start = function() {
 	Bot.super_.prototype.start.apply(this);
@@ -172,7 +180,6 @@ Bot.prototype.testNode = function (node, callback) {
 	};
 
 	var test = url.format(testOPT);
-
 	var req = http.get(test, function(res) {
 		var result = "";
 
@@ -199,7 +206,6 @@ Bot.prototype.testNode = function (node, callback) {
 	});
 	req.on('error', function (e) {
 		callback(e);
-		console.log('test failed', node.ip, node.port, node.client);
 	});
 };
 Bot.prototype.pushMachine = function (owner) {
@@ -433,17 +439,66 @@ Bot.prototype.updateDomain = function (options, cb) {
 		function (e, d) { cb(e); }
 	);
 };
-Bot.prototype.proxy = function (query) {
+Bot.prototype.online = function (subdomain) {
+	logger.info.info('online', subdomain);
+	var index = this.subdomainIndex[subdomain];
+	if(index > -1) { this.subdomain[index].alive = new Date().getTime(); }
+};
+Bot.prototype.offline = function (subdomain) {
+	logger.info.info('offline', subdomain);
+	var index = this.subdomainIndex[subdomain];
+	if(index > -1) { this.subdomain[index].alive = 0; }
+}
+Bot.prototype.proxy = function (query, test, cb) {
+	var self = this;
 	var target, node;
+	var now = new Date().getTime();
 	var index = this.subdomainIndex[query.domain];
-	if(!(index > -1)) { return false; }
+	if(!(index > -1)) {
+		var err = new Error('subdomain not found');
+		err.code = 1;
+		cb(err);
+		return;
+	}
+
 	node = this.subdomain[index];
 	target = url.format({
 		protocol: "http",
 		hostname: node.ip,
 		port: node.port
 	});
-	return target;
+	if(node.expire > now) {
+		if((node.alive + alive) > now) {
+			return cb(null, target);
+		}
+		/*
+		else if (!test) {
+			var err = new Error('machine offline');
+			err.code = 3;
+			return cb(err);
+		}
+		*/
+		else {
+			node.client = node.UUID;
+			this.testNode(node, function (e) {
+				if(e) {
+					var err = new Error('machine offline');
+					err.code = 3;
+					return cb(err);
+				}
+				else {
+					self.online(query.domain);
+					return cb(null, target);
+				}
+			});
+		}
+	}
+	else {
+		var err = new Error('subdomain not found');
+		err.code = 1;
+		cb(err);
+		return;
+	}
 };
 
 module.exports = Bot;

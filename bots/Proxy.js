@@ -27,11 +27,13 @@ Bot.prototype.init = function (config) {
 	this.proxy = httpProxy.createProxyServer({});
 	this.proxy.on('proxyReq', function(proxyReq, req, res, options) {
 		var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '0.0.0.0';
-		proxyReq.setHeader('x-forwarded-for', ip);
+	  proxyReq.setHeader('x-forwarded-for', ip);
 	});
 	this.proxy.on('error', function (err, req, res) {
-		res.writeHead(500, { 'Content-Type': 'text/plain' });
-		res.end('Peer offline, data can not be accessed.');
+		var rs = {result: -5, message: 'machine offline', data: {code: 3}};
+		res.writeHead(500, {'Content-Type': 'application/json'});
+		res.write(JSON.stringify(rs));
+		res.end();
 	});
 
 	this.http = require('http').createServer(function (req, res) { self.forward(req, res); });
@@ -100,20 +102,70 @@ Bot.prototype.startServer = function(port, httpsPort, cb) {
 };
 
 Bot.prototype.forward = function (req, res) {
+	var self = this;
 	var host = req.headers.host;
-	var subdomain = host.match(/^[a-zA-Z0-9]+./);
+	var subdomain = host.split(".").length > 2? host.match(/^[a-zA-Z0-9]+\./): null;
 	if(subdomain != null) { subdomain = subdomain[0].substr(0, subdomain[0].length - 1); }
 	var bot = this.getBot('Receptor');
 	var port = bot.listening || 5566;
 	var options = {};
 	options.target = 'http://127.0.0.1:' + port;
-	if(textype.isPublicIP(host) || subdomain === null) {}
+	if(textype.isPublicIP(host) || subdomain === null) {
+		this.proxy.web(req, res, options);
+	}
+	else if(/^\/test\/$/.test(req.url)) {
+		var tracker = this.getBot('Tracker');
+		var opt = {domain: subdomain};
+		tracker.proxy(opt, true, function (e, nodeurl) {
+			var rs = {result: 0, message: "", data: {}};
+			if(e) {
+				rs.result = -5;
+				rs.message = e.message;
+				rs.data = {code: e.code};
+				res.write(JSON.stringify(rs));
+				res.end();
+				return;
+			}
+			else {
+				rs.result = 1;
+				rs.message = "node is working";
+				res.write(JSON.stringify(rs));
+				res.end();
+				return;
+			}
+		});
+	}
 	else {
 		var tracker = this.getBot('Tracker');
 		var opt = {domain: subdomain};
-		options.target = tracker.proxy(opt) || options.target;
+		tracker.proxy(opt, false, function (e, nodeurl) {
+			if(e) {
+				var rs = {
+					result: -5,
+					message: e.message,
+					data: {code: e.code}
+				};
+				res.write(JSON.stringify(rs));
+				res.end();
+				return;
+			}
+			else {
+				options.target = nodeurl;
+				self.proxy.web(req, res, options, function (e) {
+					if(!e) {
+						tracker.online(subdomain);
+					}
+					else {
+						tracker.offline(subdomain);
+						var rs = {result: -5, message: 'machine offline', data: {code: 3}};
+						res.writeHead(500, {'Content-Type': 'application/json'});
+						res.write(JSON.stringify(rs));
+						res.end();
+					}
+				});
+			}
+		});
 	}
-	this.proxy.web(req, res, options);
 };
 
 module.exports = Bot;
