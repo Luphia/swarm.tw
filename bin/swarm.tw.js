@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-#!/usr/bin/env node
 const fs = require('fs');
 const url = require('url');
 const path = require('path');
@@ -204,25 +203,11 @@ const initialDB = function (config) {
                 });
                 break;
             default:
-                reject(new Code('01002'));
+            var DB = require('tingodb')().Db;
+            db = new DB(config.path.dataset, {});
+            resolve(config);
         }
     });
-};
-
-const initDB = ({ user, password, path }) => new Promise((resolve, reject) => {
-    mongodb.connect(user && password ? makePath({ user, password, path }) : path, (err, res) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(new MongoDB(res));
-        }
-    });
-});
-
-let makePath = ({ user, password, path }) => {
-    const tmpURL = url.parse(path);
-    tmpURL.auth = dvalue.sprintf('%s:%s', user, password);
-    return url.format(tmpURL);
 };
 
 const initialBot = function (config) {

@@ -1,0 +1,31 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+        "comma-dangle": ["error", "never"],
+        "no-underscore-dangle": [
+          "error", { 
+            "allowAfterThis": true, 
+            "allow": ["_id", "__", "_session_uid", "_session_role", "_session_token"] 
+          }
+        ],
+        "no-bitwise": ["error", { "int32Hint": true }],
+        "indent": [
+            2,
+            4, {
+              "SwitchCase": 1
+            }
+        ],
+        "max-len": [
+            "error",
+            140,
+            4, {
+                "ignoreUrls": true,
+                "ignoreTemplateLiterals": true,
+                "ignoreRegExpLiterals": true
+            }
+        ],
+        "no-case-declarations": "error",
+        "no-else-return": "off",
+        "no-unneeded-ternary": "error"
+    }
+}

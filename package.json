@@ -28,17 +28,26 @@
     "dvalue": "^1.0.6",
     "ecdb": "^0.2.11",
     "echashcash": "^1.0.1",
+    "ecresult": "^1.0.14",
     "eth-lightwallet": "^2.5.6",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
     "http-proxy": "^1.13.2",
+    "i18n": "^0.8.3",
     "kerberos": "0.0.18",
     "log4js": "^0.6.29",
     "mongodb": "^2.1.11",
     "multer": "^1.1.0",
+    "pem": "^1.12.0",
     "raid2x": "^0.1.23",
     "serve-favicon": "^2.3.0",
+    "spdy": "^3.4.7",
     "textype": "^1.0.3",
     "udp2p": "^0.2.17"
+  },
+  "devDependencies": {
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb-base": "^12.0.1",
+    "eslint-plugin-import": "^2.7.0"
   }
 }

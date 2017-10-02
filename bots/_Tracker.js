@@ -48,6 +48,7 @@ var nodeDecode = function(data) {
 };
 
 var Bot = function (config) {
+	super();
 	if (!config) config = {};
 	this.init(config);
 	this.nodes = [];
@@ -59,14 +60,16 @@ var Bot = function (config) {
 util.inherits(Bot, ParentBot);
 
 Bot.prototype.init = function (config) {
-	Bot.super_.prototype.init.call(this, config);
-	logger = config.logger;
+	return super.init(config).then((v) => {
+		logger = config.logger;
+	});
 };
 
 Bot.prototype.start = function() {
-	Bot.super_.prototype.start.apply(this);
-	this.loadNode();
-	this.loadSubdomain();
+	return super.start().then((v) => {
+		this.loadNode();
+		this.loadSubdomain();
+	});
 };
 
 Bot.prototype.exec = function(msg, callback) {
